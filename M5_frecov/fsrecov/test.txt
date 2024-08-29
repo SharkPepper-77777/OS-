@@ -1,0 +1,36 @@
+创建 FAT-32 文件系统映像：
+
+首先，通过以下命令创建一个空的 64 MiB 文件并生成 FAT-32 文件系统：
+bash
+cat /dev/zero | head -c $(( 1024 * 1024 * 64 )) > fs.img
+mkfs.fat -v -F 32 -S 512 -s 8 fs.img
+
+挂载文件系统：
+
+将生成的 fs.img 文件挂载到一个目录（如 /mnt）：
+bash
+sudo mount -o loop fs.img /mnt
+
+创建文件结构：
+
+在 /mnt 目录下创建 DCIM 目录，并在其中创建几个 .bmp 文件：
+bash
+sudo mkdir /mnt/DCIM
+sudo python3 generate_bmp.py  # 生成一些 `.bmp` 文件，并保存在 `/mnt/DCIM` 中
+
+程序执行后，检查输出目录（例如 /mnt/DCIM）中恢复的文件是否正确。
+使用 sha1sum 命令计算文件的 SHA1
+bash
+sha1sum /mnt/DCIM/*.bmp
+
+卸载文件系统：
+
+卸载挂载的文件系统：
+bash
+sudo umount /mnt
+
+运行 fsrecov 程序：
+
+使用你的 fsrecov 程序对 fs.img 文件进行恢复：
+bash
+./fsrecov-64 fs.img
